@@ -1,7 +1,7 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
+import App from './App'; // FIX: Changed to default import for App component
+import './index.css'; // Import the main CSS file for Tailwind
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

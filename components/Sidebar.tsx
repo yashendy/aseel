@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { UsersIcon } from './Icons';
 
@@ -25,13 +26,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ navItems, currentView, setCurr
     <aside className="w-20 lg:w-64 bg-white shadow-md flex flex-col transition-all duration-300">
       <div className="p-4 border-b h-20 flex flex-col justify-center">
          <div className="flex items-center justify-center lg:justify-start">
-            <div className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-bold text-xl">S</span>
-            </div>
-            <div className="hidden lg:block ml-3">
-                <h1 className="font-bold text-lg text-teal-600 leading-tight">سكري طفلي</h1>
+            {/* Removed Global Header elements from here as they are now in GlobalHeader.tsx */}
+            <div className="hidden lg:block text-center w-full">
                 <p className="text-xs text-slate-500">ملف: {childName}</p>
             </div>
+            {/* For small screens, maybe show child initial or simplified indicator if needed */}
          </div>
       </div>
       <nav className="flex-1 px-2 lg:px-4 py-4">

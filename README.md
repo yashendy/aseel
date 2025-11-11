@@ -1,20 +1,109 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# منصة متابعة سكر الأطفال
 
-# Run and deploy your AI Studio app
+منصة شاملة لمساعدة الآباء على متابعة مستويات السكر في الدم والوجبات والمواعيد الطبية لأطفالهم المصابين بالسكري، مع مساعد ذكي لتحليل البيانات وتقديم النصائح.
 
-This contains everything you need to run your app locally.
+## نظرة عامة على المشروع
 
-View your app in AI Studio: https://ai.studio/apps/drive/172ZgrEbo7gfMzFAdlGiN6JxScMKu29Ia
+هذا المشروع هو واجهة أمامية (frontend) تفاعلية مبنية باستخدام React و TypeScript، ويدعم Vite كأداة بناء، بالإضافة إلى Tailwind CSS للتصميم السريع والمستجيب. يهدف إلى توفير أدوات سهلة الاستخدام لمراقبة وإدارة حالة الطفل المصاب بالسكري، بما في ذلك تسجيل القياسات، وتخطيط الوجبات، وتلقي رؤى تحليلية من مساعد ذكي يعمل بتقنية Gemini API.
 
-## Run Locally
+## البدء (Getting Started)
 
-**Prerequisites:**  Node.js
+لإعداد وتشغيل المشروع محلياً، اتبع الخطوات التالية:
 
+### 1. المتطلبات الأساسية
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+تأكد من تثبيت Node.js و npm (أو Yarn/pnpm) على جهازك:
+*   [Node.js](https://nodejs.org/en/download/) (يأتي npm معه)
+
+### 2. استنساخ المستودع (Clone the repository)
+
+قم بنسخ المستودع إلى جهازك المحلي:
+
+```bash
+git clone https://github.com/yashendy/aseel.git
+cd aseel
+```
+
+### 3. تثبيت التبعيات (Install Dependencies)
+
+قم بتثبيت جميع تبعيات المشروع:
+
+```bash
+npm install
+# أو
+# yarn install
+# أو
+# pnpm install
+```
+
+### 4. إعداد مفتاح API لـ Gemini
+
+يستخدم هذا التطبيق Google Gemini API لتقديم ميزات المساعد الذكي. يجب توفير مفتاح الـ API عبر متغير بيئة.
+
+1.  أنشئ ملفاً جديداً باسم `.env` في المجلد الجذر للمشروع (بنفس مستوى `package.json`).
+2.  أضف مفتاح الـ API الخاص بك بهذا التنسيق:
+
+    ```env
+    VITE_API_KEY=YOUR_GEMINI_API_KEY
+    ```
+
+    **ملاحظة هامة:**
+    *   يجب أن يبدأ اسم متغير البيئة بـ `VITE_` عند استخدام Vite للوصول إليه في الكود الأمامي (frontend).
+    *   لا تقم بمشاركة هذا الملف أو رفعه إلى GitHub. `.gitignore` مُعد لتجاهله تلقائياً.
+    *   يتم الوصول إلى مفتاح الـ API في الكود عبر `process.env.API_KEY`. تأكد من أن هذا المتغير متاح في بيئة التنفيذ.
+
+### 5. تشغيل خادم التطوير (Run Development Server)
+
+لبدء خادم التطوير المحلي، والذي يعيد تحميل التطبيق تلقائياً عند حفظ التغييرات:
+
+```bash
+npm run dev
+# أو
+# yarn dev
+# أو
+# pnpm dev
+```
+
+سيتم تشغيل التطبيق عادةً على `http://localhost:5173`.
+
+### 6. بناء المشروع للإنتاج (Build for Production)
+
+لإنشاء نسخة محسّنة وجاهزة للنشر من التطبيق:
+
+```bash
+npm run build
+# أو
+# yarn build
+# أو
+# pnpm build
+```
+
+سيتم إنشاء ملفات البناء في مجلد `dist/`.
+
+### 7. فحص الأنواع (Type Checking)
+
+للتأكد من عدم وجود أخطاء TypeScript:
+
+```bash
+npm run type-check
+# أو
+# yarn type-check
+# أو
+# pnpm type-check
+```
+
+## التكامل مع قاعدة البيانات (Database Integration - Future Work)
+
+**مفهوم:**
+التطبيق الحالي هو واجهة أمامية بحتة، ويستخدم بيانات وهمية (mock data) لإظهار الوظائف. لربط المشروع بقاعدة بيانات حقيقية، ستحتاج إلى تطوير طبقة خلفية (Backend API). هذه الـ API ستكون بمثابة وسيط بين الواجهة الأمامية وقاعدة البيانات.
+
+**لماذا نحتاج Backend API؟**
+*   **الأمان:** لا ينبغي للواجهة الأمامية الاتصال بقاعدة البيانات مباشرة لأسباب أمنية.
+*   **المنطق التجاري:** تحتوي الـ API على المنطق اللازم لمعالجة البيانات، والتحقق من صحتها، وتخزينها، واسترجاعها.
+*   **قابلية التوسع:** تتيح لك الـ API التوسع والتعامل مع عدد أكبر من المستخدمين والطلبات بفعالية.
+
+**كيفية الربط المستقبلي:**
+1.  **اختر تقنية Backend:** يمكنك استخدام تقنيات مثل Node.js (مع Express.js)، Python (مع Django أو Flask)، Java (مع Spring Boot)، وغيرها لبناء الـ API.
+2.  **تصميم قاعدة البيانات:** قم بتصميم مخطط قاعدة البيانات (database schema) لتخزين بيانات الأطفال، قراءات السكر، الوجبات، المواعيد، المستخدمين، إلخ.
+3.  **بناء Endpoints للـ API:** أنشئ مسارات (endpoints) في الـ API للعمليات المختلفة (مثل `/api/children`, `/api/sugar-readings`)، والتي ستقوم الواجهة الأمامية بالاتصال بها (باستخدام `fetch` أو مكتبات مثل `axios`).
+4.  **تحديث الواجهة الأمامية:** استبدل وظائف جلب البيانات الوهمية في `services` بطلبات HTTP إلى الـ API الجديدة.

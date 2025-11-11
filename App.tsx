@@ -1,4 +1,5 @@
 
+
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
@@ -21,7 +22,8 @@ import { CGMIntegrationPage } from './components/CGMIntegrationPage';
 import { CommunityPage } from './components/CommunityPage';
 import { VoiceAssistantModal } from './components/VoiceAssistantModal';
 import { SmartwatchView } from './components/SmartwatchView';
-import { LogType, SugarReading, MealLog, Appointment, ChildProfile, ParentProfile, MealTemplate, Reward, DoctorProfile, FoodItem, GrowthRecord, InsulinLog, ExerciseLog, SicknessLog, DailyLogs, ProactiveInsight, Conversation, Message, CommunityPost, CommunityReply, GlucosePrediction, VoiceCommand, Caregiver, CarePlan, DashboardWidget } from './types';
+import { GlobalHeader } from './components/GlobalHeader'; // Import GlobalHeader
+import { LogType, SugarReading, MealLog, Appointment, ChildProfile, ParentProfile, MealTemplate, Reward, DoctorProfile, FoodItem, GrowthRecord, InsulinLog, ExerciseLog, SicknessLog, DailyLogs, ProactiveInsight, Conversation, Message, CommunityPost, CommunityReply, Caregiver, CarePlan, DashboardWidget, GlucosePrediction } from './types'; // FIX: Imported GlucosePrediction
 import { DUMMY_APPOINTMENTS, DUMMY_MEALS, DUMMY_SUGAR_READINGS, DUMMY_CHILD_PROFILES, DUMMY_PARENT_PROFILE, EMPTY_PROFILE_DEFAULTS, DUMMY_MEAL_TEMPLATES, DUMMY_REWARDS, DUMMY_DOCTOR_PROFILES, DUMMY_FOOD_ITEMS, DUMMY_INSULIN_LOGS, DUMMY_EXERCISE_LOGS, DUMMY_SICKNESS_LOGS, DUMMY_CHALLENGES, DUMMY_BADGES, DUMMY_CONVERSATIONS, DUMMY_MESSAGES, DUMMY_COMMUNITY_POSTS, DUMMY_COMMUNITY_REPLIES, DUMMY_CAREGIVERS, DUMMY_CARE_PLANS } from './constants';
 import { generateProactiveInsights, generateGlucosePrediction, processVoiceCommand, analyzeHealthData } from './services/geminiService';
 import { HeartPulseIcon, BrainCircuitIcon, UtensilsIcon, ChildIcon, DropletIcon, ClipboardListIcon, StethoscopeIcon, BookOpenIcon, TrophyIcon, GiftIcon, TrendingUpIcon, MessageSquareIcon, Share2Icon, MessageCircleIcon, MicIcon } from './components/Icons';
@@ -63,14 +65,16 @@ const App: React.FC = () => {
   const [appMode, setAppMode] = useState<AppMode>('parent');
   const [adminView, setAdminView] = useState<AdminView>('dashboard');
   const [dailyCompletedChallenges, setDailyCompletedChallenges] = useState<string[]>([]);
-  const [proactiveInsights, setProactiveInsights] = useState<ProactiveInsight[]>([]);
+  const [proactiveInsights, setProactiveInsights] = useState([]);
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
   const [prediction, setPrediction] = useState<GlucosePrediction | null>(null);
   const [isPredicting, setIsPredicting] = useState(false);
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [isSmartwatchVisible, setIsSmartwatchVisible] = useState(false);
   
-  // FIX: In a browser environment, setInterval returns a number, not a NodeJS.Timeout.
+  // FIX: Explicitly cast the return type of setInterval to number,
+  // as in a browser environment it returns a number, not a NodeJS.Timeout.
+  // Using `unknown` as an intermediate cast to handle potential type discrepancies with global `setInterval` definitions.
   const cgmIntervalRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -90,7 +94,7 @@ const App: React.FC = () => {
                 };
                 return [newReading, ...prev];
             });
-        }, 5000); // Add a new reading every 5 seconds for demo
+        }, 5000) as unknown as number; // Explicit cast to number
     } else if (!selectedChild?.cgm && cgmIntervalRef.current) {
         clearInterval(cgmIntervalRef.current);
         cgmIntervalRef.current = null;
@@ -251,7 +255,7 @@ const App: React.FC = () => {
 
     const timer = setTimeout(fetchInsights, 1000); // Debounce fetching
     return () => clearTimeout(timer);
-  }, [selectedChildId, sugarReadings, mealLogs, insulinLogs, exerciseLogs]);
+  }, [selectedChildId, sugarReadings, mealLogs, insulinLogs, exerciseLogs, selectedChild]);
   
   const addMealTemplate = useCallback((templateData: Omit<MealTemplate, 'id'>) => {
     if (!selectedChildId) return;
@@ -524,7 +528,7 @@ const App: React.FC = () => {
         }
     
         return "لم أتمكن من فهم الأمر. هل يمكنك المحاولة مرة أخرى؟";
-    }, [selectedChildId, selectedChild, childSugarReadings, childMealLogs, childInsulinLogs, childExerciseLogs, childSicknessLogs, childAppointments]);
+    }, [selectedChildId, selectedChild, childSugarReadings, childMealLogs, childInsulinLogs, childExerciseLogs, childSicknessLogs, childAppointments, addLogAndCheckAwards]);
 
   const handleUpdateDashboardLayout = (newLayout: DashboardWidget[]) => {
       setParentProfile(prev => ({...prev, dashboardLayout: newLayout}));
@@ -648,7 +652,7 @@ const App: React.FC = () => {
       case 'logs': return <DataManagement appointments={childAppointments} addLog={addLogAndCheckAwards} />;
       case 'meals': return <MealsPage profile={selectedChild!} addLog={addLogAndCheckAwards} mealTemplates={childMealTemplates} addMealTemplate={addMealTemplate} childMealLogs={childMealLogs} foodItems={foodItems} onAddFoodItem={handleAddFoodItem} />;
       case 'cgm': return <CGMIntegrationPage profile={selectedChild!} onConnectCGM={handleConnectCGM} onDisconnectCGM={handleDisconnectCGM} />;
-      case 'rewards': return <RewardsPage 
+      case 'rewards': return <RewardsPage
                                 profile={selectedChild!}
                                 rewards={rewards}
                                 onClaimReward={handleClaimReward}
@@ -779,11 +783,12 @@ const App: React.FC = () => {
                   onSwitchToAdminView={() => { setAppMode('admin'); setAdminView('dashboard'); }}
                   onSwitchToCaregiverView={() => setAppMode('caregiver')}
                   appMode={appMode}
+                  setIsVoiceModalOpen={setIsVoiceModalOpen} // Pass down state setter for voice modal
               />;
     }
 
     return (
-      <div className="flex h-screen bg-slate-50 text-slate-800">
+      <div className="flex flex-grow bg-slate-50 text-slate-800"> {/* Removed h-screen as it's now handled by the overall flex container */}
         <Sidebar 
           navItems={navItems} 
           currentView={currentView} 
@@ -799,7 +804,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen"> {/* Added flex-col to stack header and content */}
+      <GlobalHeader parentProfile={parentProfile} appMode={appMode} /> {/* Render GlobalHeader here */}
       <GlobalNotifications
         appointments={appointments}
         dismissedIds={dismissedReminderIds}
@@ -820,17 +826,17 @@ const App: React.FC = () => {
             onLogInsulin={(units) => addLogAndCheckAwards(LogType.INSULIN, { units, type: 'bolus' })}
           />
       )}
-      {appMode === 'parent' && selectedChildId && !isSmartwatchVisible && (
+      {/* Voice assistant button: only visible when a child is selected and smartwatch not visible */}
+      {appMode === 'parent' && selectedChildId && !isSmartwatchVisible && ( // Only show if a child is selected
         <button
             onClick={() => setIsVoiceModalOpen(true)}
-            className="fixed bottom-6 left-6 z-40 bg-teal-500 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:bg-teal-600 transition-transform hover:scale-110"
+            className="fixed bottom-6 right-6 z-40 bg-teal-500 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-lg hover:bg-teal-600 transition-transform hover:scale-110"
             aria-label="افتح المساعد الصوتي"
         >
             <MicIcon className="w-8 h-8"/>
         </button>
       )}
-    </>
+    </div>
   );
 };
-
 export default App;

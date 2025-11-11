@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { MealLog } from '../types';
@@ -21,21 +22,23 @@ export const MealHistorySummary: React.FC<MealHistorySummaryProps> = ({ mealLogs
     const day = new Date(log.date).toLocaleDateString('en-CA'); // YYYY-MM-DD
     acc[day] = (acc[day] || 0) + log.carbs;
     return acc;
-  }, {});
+  }, {} as Record<string, number>); // Explicitly type the initial accumulator
 
   const totalDays = Object.keys(carbsByDay).length;
-  const totalCarbs = Object.values(carbsByDay).reduce((sum, carbs) => sum + carbs, 0);
+  // FIX: Explicitly typed the accumulator and current value in the `reduce` callback for `totalCarbs`
+  // to ensure correct type inference and resolve 'Operator '+' cannot be applied to types 'unknown' and 'unknown'' error.
+  const totalCarbs = Object.values(carbsByDay).reduce((sum: number, carbs: number) => sum + carbs, 0);
   const averageDailyCarbs = totalDays > 0 ? (totalCarbs / totalDays).toFixed(0) : '0';
 
   // FIX: Added type for the accumulator to prevent type errors.
-  const mealTypeStats = mealLogs.reduce((acc: Record<string, { count: number, totalCarbs: number }>, log) => {
+  const mealTypeStats = mealLogs.reduce((acc: Record<MealLog['mealType'], { count: number, totalCarbs: number }>, log) => {
     if (!acc[log.mealType]) {
         acc[log.mealType] = { count: 0, totalCarbs: 0 };
     }
     acc[log.mealType].count += 1;
     acc[log.mealType].totalCarbs += log.carbs;
     return acc;
-  }, {});
+  }, {} as Record<MealLog['mealType'], { count: number, totalCarbs: number }>);
 
   const mealTypeData = (Object.keys(MEAL_TYPE_NAMES) as Array<MealLog['mealType']>).map(key => ({
     name: MEAL_TYPE_NAMES[key],
